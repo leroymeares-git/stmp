@@ -30,7 +30,7 @@ func readConfig() {
 	viper.SetDefault("keys.pageBrowser", "1")
 	viper.SetDefault("keys.pageQueue", "2")
 	viper.SetDefault("keys.pagePlaylists", "3")
-	viper.SetDefault("keys.pageLog", "4")
+	viper.SetDefault("keys.pageLog", "7")
 	viper.SetDefault("keys.quit", "q")
 	viper.SetDefault("keys.addRandomSongs", "s")
 	viper.SetDefault("keys.clearQueue", "D")
