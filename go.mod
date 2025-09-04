@@ -1,4 +1,4 @@
-module github.com/wildeyedskies/stmp
+module github.com/leroymeares-git/stmp
 
 go 1.15
 
