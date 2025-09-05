@@ -76,7 +76,7 @@ func ListenForButton(player *Player) {
         log.Fatal(err)
     }
 
-    pin := rpi.P1_11
+    pin := rpi.P1_37
     if err := pin.In(gpio.PullUp, gpio.BothEdges); err != nil {
         log.Fatal(err)
     }
