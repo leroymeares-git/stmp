@@ -4,7 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
+ 	"log"
+    "time"
 
+    "periph.io/x/conn/v3/gpio"
+    "periph.io/x/host/v3"
+    "periph.io/x/host/v3/rpi"
 	"github.com/spf13/viper"
 )
 
@@ -66,6 +71,31 @@ func (l Logger) Printf(s string, as ...interface{}) {
 	l.prints <- fmt.Sprintf(s, as...)
 }
 
+func ListenForButton(player *Player) {
+    if _, err := host.Init(); err != nil {
+        log.Fatal(err)
+    }
+
+    pin := rpi.P1_11
+    if err := pin.In(gpio.PullUp, gpio.BothEdges); err != nil {
+        log.Fatal(err)
+    }
+
+    go func() {
+        for {
+            pin.WaitForEdge(-1)
+            if pin.Read() == gpio.Low {
+                // Call the method on the Player instance
+                err := player.PlayNextTrack()
+                if err != nil {
+                    log.Printf("Error playing next track: %v", err)
+                }
+            }
+            time.Sleep(200 * time.Millisecond) // debounce
+        }
+    }()
+}
+
 func main() {
 	help := flag.Bool("help", false, "Print usage")
 	enableMpris := flag.Bool("mpris", false, "Enable MPRIS2")
@@ -106,6 +136,8 @@ func main() {
 		fmt.Println("Unable to initialize mpv. Is mpv installed?")
 		os.Exit(1)
 	}
+
+	 ListenForButton(player)
 
 	if *enableMpris {
 		mpris, err := RegisterPlayer(player, logger)
