@@ -61,6 +61,13 @@ func (p *Player) PlayNextTrack() error {
 	return nil
 }
 
+func (p *Player) PlayNextPlaylist() error {
+	if len(p.Queue) > 0 {
+		return p.Instance.Command([]string{"playlist-next-playlist"})
+	}
+	return nil
+}
+
 func (p *Player) Play(id string, uri string, title string, artist string, duration int) error {
 	p.Queue = []QueueItem{{id, uri, title, artist, duration}}
 	p.ReplaceInProgress = true
