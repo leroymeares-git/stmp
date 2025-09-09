@@ -863,6 +863,11 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 				ui.connection.Logger.Printf("InitGui: AdjustVolume %d -- %s", -5, err.Error())
 			}
 			return nil
+		case keybind("nextplaylist"):
+			if err := ui.player.PlayNextPlaylist(); err != nil {
+				ui.connection.Logger.Printf("InitGui: PlayNextPlaylist -- %s", err.Error())
+			}
+			return nil
 		case keybind("volumeUp"):
 			if err := ui.player.AdjustVolume(5); err != nil {
 				ui.connection.Logger.Printf("InitGui: AdjustVolume %d -- %s", 5, err.Error())
