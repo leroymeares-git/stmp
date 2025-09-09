@@ -61,9 +61,7 @@ func (ui *Ui) handleEntitySelected(directoryId string) {
 			handler = ui.makeEntityHandler(entity.Id)
 		} else {
 			title = entityListTextFormat(entity, ui.starIdList )
-			handler = makeSongHandler(id, ui.connection.GetPlayUrl(&entity),
-				title, stringOr(entity.Artist, response.Directory.Name),
-				entity.Duration, ui.player, ui.queueList, ui.starIdList)
+			handler = makeSongHandler(id, ui.player, ui.queueList, ui.starIdList)
 		}
 
 		ui.entityList.AddItem(title, "", 0, handler)
@@ -80,7 +78,7 @@ func (ui *Ui) handlePlaylistSelected(playlist SubsonicPlaylist) {
 		var id = entity.Id
 
 		title = entity.getSongTitle()
-		handler = makeSongHandler(id, ui.connection.GetPlayUrl(&entity), title, entity.Artist, entity.Duration, ui.player, ui.queueList, ui.starIdList)
+		handler = makeSongHandler(id, ui.player, ui.queueList, ui.starIdList)
 
 		ui.selectedPlaylist.AddItem(title, "", 0, handler)
 	}
@@ -420,9 +418,33 @@ func (ui *Ui) deletePlaylist(index int) {
 	ui.connection.DeletePlaylist(string(playlist.Id))
 }
 
-func makeSongHandler(id string, uri string, title string, artist string, duration int, player *Player, queueList *tview.List, starIdList map[string]struct{}) func() {
+func makeSongHandler(trackID string, player *Player, queueList *tview.List, starIdList map[string]struct{}) func() {
 	return func() {
-		player.Play(id, uri, title, artist, duration)
+		pl := player.CurrentPlaylist()
+		if pl == nil {
+			return
+		}
+
+		// find the index of the track in the active playlist
+		trackIndex := -1
+		for i, t := range pl.Tracks {
+			if t.Id == trackID {
+				trackIndex = i
+				break
+			}
+		}
+		if trackIndex == -1 {
+			return
+		}
+
+		// play the track by index
+		if err := player.Play(trackIndex); err != nil {
+			// optionally log the error
+			fmt.Printf("Error playing track: %v\n", err)
+			return
+		}
+
+		// update the UI queue list
 		updateQueueList(player, queueList, starIdList)
 	}
 }
