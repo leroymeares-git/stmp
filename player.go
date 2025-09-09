@@ -24,6 +24,7 @@ type Player struct {
 	Instance          *mpv.Mpv
 	EventChannel      chan *mpv.Event
 	Queue             []QueueItem
+    CurrentIndex      int
 	ReplaceInProgress bool
 }
 
@@ -55,10 +56,12 @@ func InitPlayer() (*Player, error) {
 }
 
 func (p *Player) PlayNextTrack() error {
-	if len(p.Queue) > 0 {
-		return p.Instance.Command([]string{"loadfile", p.Queue[0].Uri})
-	}
-	return nil
+	    if p.CurrentIndex+1 < len(p.Queue) {
+        p.CurrentIndex++
+        next := p.Queue[p.CurrentIndex]
+        return p.Instance.Command([]string{"loadfile", next.Uri})
+    }
+    return nil // nothing left to play
 }
 
 func (p *Player) PlayNextPlaylist() error {
@@ -70,6 +73,7 @@ func (p *Player) PlayNextPlaylist() error {
 
 func (p *Player) Play(id string, uri string, title string, artist string, duration int) error {
 	p.Queue = []QueueItem{{id, uri, title, artist, duration}}
+	p.CurrentIndex = 0
 	p.ReplaceInProgress = true
 	if ip, e := p.IsPaused(); ip && e == nil {
 		p.Pause()
