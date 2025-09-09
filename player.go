@@ -52,7 +52,13 @@ func InitPlayer() (*Player, error) {
 		return nil, err
 	}
 
-	return &Player{mpvInstance, eventListener(mpvInstance), make([]QueueItem, 0), false}, nil
+	return &Player{
+        Instance:          mpvInstance,
+        EventChannel:      eventListener(mpvInstance),
+        Queue:             make([]QueueItem, 0),
+        CurrentIndex:      0,
+        ReplaceInProgress: false,
+    }, nil
 }
 
 func (p *Player) PlayNextTrack() error {
