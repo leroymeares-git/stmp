@@ -45,6 +45,7 @@ func InitPlayer() (*Player, error) {
 	// TODO figure out what other mpv options we need
 	mpvInstance.SetOptionString("audio-display", "no")
 	mpvInstance.SetOptionString("video", "no")
+	mpvInstance.SetOptionString("loop-playlist", "inf")
 
 	err := mpvInstance.Initialize()
 	if err != nil {
