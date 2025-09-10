@@ -106,33 +106,36 @@ func (ui *Ui) handleAddRandomSongs() {
 }
 
 func (ui *Ui) handleToggleStar() {
-	currentIndex := ui.queueList.GetCurrentItem()
-	queue := ui.player.Queue
-
-	if currentIndex == -1 || len(ui.player.Queue) < currentIndex {
+	// Get the active playlist and current track index
+	pl := ui.player.CurrentPlaylist()
+	if pl == nil || len(pl.Tracks) == 0 {
 		return
 	}
 
-	var entity = queue[currentIndex]
-
-	// If the song is already in the star list, remove it
-	_, remove := ui.starIdList[entity.Id]
-
-	// resp, _ := ui.connection.ToggleStar(entity.Id, remove)
-	ui.connection.ToggleStar(entity.Id, ui.starIdList)
-
-	if (remove) {
-		delete(ui.starIdList, entity.Id)
-	} else {
-		ui.starIdList[entity.Id] = struct{}{}
+	currentIndex := ui.player.CurrentIndex
+	if currentIndex < 0 || currentIndex >= len(pl.Tracks) {
+		return
 	}
 
-	var text = queueListTextFormat(ui.player.Queue[currentIndex], ui.starIdList )
+	track := pl.Tracks[currentIndex]
+
+	// Toggle star
+	_, remove := ui.starIdList[track.Id]
+	ui.connection.ToggleStar(track.Id, ui.starIdList) // updates server and map
+
+	if remove {
+		delete(ui.starIdList, track.Id)
+	} else {
+		ui.starIdList[track.Id] = struct{}{}
+	}
+
+	// Update queue list UI
+	text := queueListTextFormat(track, ui.starIdList)
 	updateQueueListItem(ui.queueList, currentIndex, text)
-	// Update the entity list to reflect any changes
-	ui.connection.Logger.Printf("entity test", ui.currentDirectory)
-	if (ui.currentDirectory != nil) {
-		ui.handleEntitySelected(ui.currentDirectory.Id) 
+
+	// Update entity list if visible
+	if ui.currentDirectory != nil {
+		ui.handleEntitySelected(ui.currentDirectory.Id)
 	}
 }
 
@@ -331,24 +334,31 @@ func (ui *Ui) searchPrev() {
 func (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
 	uri := ui.connection.GetPlayUrl(entity)
 
-	var artist string
-	if ui.currentDirectory == nil {
-		artist = entity.Artist
-	} else {
-		stringOr(entity.Artist, ui.currentDirectory.Name)
+	// Determine the artist string
+	artist := stringOr(entity.Artist, "")
+	if ui.currentDirectory != nil {
+		artist = stringOr(entity.Artist, ui.currentDirectory.Name)
 	}
 
-	var id = entity.Id
-
-
-	queueItem := QueueItem{
-		id,
-		uri,
-		entity.getSongTitle(),
-		artist,
-		entity.Duration,
+	// Create the track object
+	track := QueueItem{
+		Id:       entity.Id,
+		Uri:      uri,
+		Title:    entity.getSongTitle(),
+		Artist:   artist,
+		Duration: entity.Duration,
 	}
-	ui.player.Queue = append(ui.player.Queue, queueItem)
+
+	// Ensure a playlist exists
+	if ui.player.CurrentPlaylist() == nil {
+		ui.player.ActivePlaylist = &Playlist{Tracks: []QueueItem{}}
+	}
+
+	// Add track to the active playlist
+	ui.player.CurrentPlaylist().Tracks = append(ui.player.CurrentPlaylist().Tracks, track)
+
+	// Update the UI
+	updateQueueList(ui.player, ui.queueList, ui.starIdList)
 }
 
 func (ui *Ui) newPlaylist(name string) {
