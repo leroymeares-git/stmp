@@ -464,7 +464,13 @@ func createUi(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connectio
 		player.CurrentIndex = -1
 	}
 	
-
+  serverPlaylists, err := connection.GetPlaylists()
+    if err != nil {
+        connection.Logger.Printf("Failed to fetch playlists: %s", err.Error())
+    } else {
+        *playlists = serverPlaylists.Playlists
+    }
+	
 	ui := &Ui{
 		app:               app,
 		pages:             pages,
