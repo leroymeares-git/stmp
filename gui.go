@@ -493,10 +493,10 @@ func createUi(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connectio
 		scrobbleTimer:     scrobbleTimer,
 	}
 
-	for _, pl := range player.Playlists {
-		ui.playlistList.AddItem(pl.Name, "", 0, nil)
-		ui.addToPlaylistList.AddItem(pl.Name, "", 0, nil)
-	}
+	for _, pl := range *playlists {
+    ui.playlistList.AddItem(pl.Name, "", 0, nil)
+    ui.addToPlaylistList.AddItem(pl.Name, "", 0, nil)
+}
 	
 	ui.addStarredToList()
 
