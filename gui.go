@@ -331,7 +331,7 @@ func (ui *Ui) searchPrev() {
 	ui.artistList.SetCurrentItem(idxs[len(idxs)-1])
 }
 
-ffunc (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
+func (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
 	uri := ui.connection.GetPlayUrl(entity)
 
 	// Determine artist
