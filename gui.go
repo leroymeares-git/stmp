@@ -331,16 +331,15 @@ func (ui *Ui) searchPrev() {
 	ui.artistList.SetCurrentItem(idxs[len(idxs)-1])
 }
 
-func (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
+ffunc (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
 	uri := ui.connection.GetPlayUrl(entity)
 
-	// Determine the artist string
+	// Determine artist
 	artist := stringOr(entity.Artist, "")
 	if ui.currentDirectory != nil {
 		artist = stringOr(entity.Artist, ui.currentDirectory.Name)
 	}
 
-	// Create the track object
 	track := QueueItem{
 		Id:       entity.Id,
 		Uri:      uri,
@@ -349,22 +348,22 @@ func (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
 		Duration: entity.Duration,
 	}
 
-	// Ensure a playlist exists
-	  if ui.player.ActiveIndex < 0 || ui.player.ActiveIndex >= len(ui.player.Playlists) {
-        newPl := &Playlist{
-            Name:   "Default",
-            Tracks: []QueueItem{},
-        }
-        ui.player.Playlists = append(ui.player.Playlists, newPl)
-        ui.player.ActiveListIdx = len(ui.player.Playlists) - 1
-        ui.player.CurrentIndex = -1
-    }
+	// If no playlists exist, create a default playlist locally
+	if len(ui.player.Playlists) == 0 {
+		defaultPl := Playlist{
+			Name:   "Default",
+			Tracks: []QueueItem{},
+		}
+		ui.player.Playlists = append(ui.player.Playlists, defaultPl)
+		ui.player.ActiveListIdx = 0
+		ui.player.CurrentIndex = -1
+	}
 
-	// Add track to the active playlist
-	activePl := ui.player.Playlists[ui.player.ActiveListIdx]
-    activePl.Tracks = append(activePl.Tracks, track)
+	// Append to the active playlist
+	activePl := &ui.player.Playlists[ui.player.ActiveListIdx] // pointer to avoid copy
+	activePl.Tracks = append(activePl.Tracks, track)
 
-	// Update the UI
+	// Update the UI queue
 	updateQueueList(ui.player, ui.queueList, ui.starIdList)
 }
 
