@@ -853,7 +853,12 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 			if status == PlayerStopped {
 				ui.startStopStatus.SetText("[::b]stmp: [red]stopped")
 			} else if status == PlayerPlaying {
-				ui.startStopStatus.SetText("[::b]stmp: [green]playing " + ui.player.Queue[0].Title)
+				if track := ui.player.CurrentTrack(); track != nil {
+            		ui.startStopStatus.SetText("[::b]stmp: [green]playing " + track.Title)
+        		} else {
+            		ui.startStopStatus.SetText("[::b]stmp: [red]no track")
+       			 }
+				//ui.startStopStatus.SetText("[::b]stmp: [green]playing " + ui.player.Queue[0].Title)
 			} else if status == PlayerPaused {
 				ui.startStopStatus.SetText("[::b]stmp: [yellow]paused")
 			}
