@@ -150,7 +150,8 @@ if len(playlistResponse.Playlists.Playlists) > 0 {
 			fmt.Printf("Error fetching playlist %s: %s\n", firstPlaylist.Name, err)
 		} else {
 			firstPlaylist.Entries = fullPlaylist.Entries
-
+		}
+	
      for _, entry := range firstPlaylist.Entries {
         player.Queue = append(player.Queue, QueueItem{
             entry.Id,
