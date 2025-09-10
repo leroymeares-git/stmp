@@ -144,6 +144,13 @@ func main() {
 if len(playlistResponse.Playlists.Playlists) > 0 {
     firstPlaylist := playlistResponse.Playlists.Playlists[0]
 
+			// Fetch full playlist entries (GetPlaylists often returns only metadata)
+		fullPlaylist, err := connection.GetPlaylist(firstPlaylist.Id)
+		if err != nil {
+			fmt.Printf("Error fetching playlist %s: %s\n", firstPlaylist.Name, err)
+		} else {
+			firstPlaylist.Entries = fullPlaylist.Entries
+
      for _, entry := range firstPlaylist.Entries {
         player.Queue = append(player.Queue, QueueItem{
             entry.Id,
