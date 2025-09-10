@@ -350,18 +350,19 @@ func (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
 	}
 
 	// Ensure a playlist exists
-	if ui.player.CurrentPlaylist() == nil {
-		newPl := &Playlist{
-			Name:   "Default",
-			Tracks: []QueueItem{},
-		}
-		ui.player.Playlists = append(ui.player.Playlists, newPl)
-		ui.player.ActiveIndex = len(ui.player.Playlists) - 1
-		ui.player.CurrentIndex = -1
-	}
+	  if ui.player.ActiveIndex < 0 || ui.player.ActiveIndex >= len(ui.player.Playlists) {
+        newPl := &Playlist{
+            Name:   "Default",
+            Tracks: []QueueItem{},
+        }
+        ui.player.Playlists = append(ui.player.Playlists, newPl)
+        ui.player.ActiveListIdx = len(ui.player.Playlists) - 1
+        ui.player.CurrentIndex = -1
+    }
 
 	// Add track to the active playlist
-	ui.player.CurrentPlaylist().Tracks = append(ui.player.CurrentPlaylist().Tracks, track)
+	activePl := ui.player.Playlists[ui.player.ActiveListIdx]
+    activePl.Tracks = append(activePl.Tracks, track)
 
 	// Update the UI
 	updateQueueList(ui.player, ui.queueList, ui.starIdList)
