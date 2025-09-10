@@ -66,13 +66,14 @@ func (p *Player) PlayNextTrack() error {
         return nil // nothing in queue
     }
 
-    if p.CurrentIndex+1 >= len(p.Queue) {
-        return p.Stop() // reached end of queue
+	 if p.CurrentIndex+1 >= len(p.Queue) {
+        p.CurrentIndex = 0 // loop back to start
+    } else {
+        p.CurrentIndex++
     }
-
-    p.CurrentIndex++
+	
     next := p.Queue[p.CurrentIndex]
-	p.Queue = []QueueItem{{next.id, next.uri, next.title, next.artist, next.duration}}
+	p.Queue = []QueueItem{{next.Id, next.Uri, next.Title, next.Artist, next.Duration}}
     p.ReplaceInProgress = true
     return p.Instance.Command([]string{"loadfile", next.Uri})
 }
