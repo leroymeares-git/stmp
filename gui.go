@@ -913,30 +913,7 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 		panic(err)
 	}
 
-	// ✅ Auto-load first playlist into the queue
-    if len(ui.playlists) > 0 {
-        firstPlaylist := ui.playlists[0]
-        for _, entity := range firstPlaylist.Entries {
-            ui.addSongToQueue(&entity)
-        }
-
-        // update the queue list UI
-        updateQueueList(ui.player, ui.queueList, ui.starIdList)
-
-        // start playback at the first track
-        if len(ui.player.Queue) > 0 {
-            first := ui.player.Queue[0]
-            if err := ui.player.Play(first.Id, first.Uri, first.Title, first.Artist, first.Duration); err != nil {
-                ui.connection.Logger.Printf("InitGui: Failed to auto-play first playlist -- %s", err.Error())
-            } else {
-                ui.startStopStatus.SetText("[::b]stmp: [green]playing " + first.Title)
-            }
-        }
-
-        // ✅ Preselect the Playlist tab instead of Queue
-        ui.pages.SwitchToPage("playlists")
-		ui.currentPage.SetText("Playlists")
-    }
+	ui.pages.SwitchToPage(playlists)
 
 	return ui
 }
