@@ -454,6 +454,17 @@ func createUi(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connectio
 		<-scrobbleTimer.C
 	}
 
+	if len(player.Playlists) == 0 {
+		defaultPl := Playlist{
+			Name:   "Default",
+			Tracks: []QueueItem{},
+		}
+		player.Playlists = append(player.Playlists, defaultPl)
+		player.ActiveListIdx = 0
+		player.CurrentIndex = -1
+	}
+	
+
 	ui := &Ui{
 		app:               app,
 		pages:             pages,
@@ -476,6 +487,11 @@ func createUi(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connectio
 		scrobbleTimer:     scrobbleTimer,
 	}
 
+	for _, pl := range player.Playlists {
+		ui.playlistList.AddItem(pl.Name, "", 0, nil)
+		ui.addToPlaylistList.AddItem(pl.Name, "", 0, nil)
+	}
+	
 	ui.addStarredToList()
 
 	// Handle MPV events in background
