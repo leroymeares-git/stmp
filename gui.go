@@ -351,7 +351,10 @@ func (ui *Ui) addSongToQueue(entity *SubsonicEntity) {
 
 	// Ensure a playlist exists
 	if ui.player.CurrentPlaylist() == nil {
-		ui.player.ActivePlaylist = &Playlist{Tracks: []QueueItem{}}
+	// Create a new empty playlist
+	newPl := &Playlist{
+		Name:   "Default",
+		Tracks: []QueueItem{},
 	}
 
 	// Add track to the active playlist
