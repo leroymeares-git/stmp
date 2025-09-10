@@ -140,23 +140,6 @@ func main() {
 
 	 ListenForButton(player)
 
-	// ✅ Load the first playlist into the queue
-if len(playlistResponse.Playlists.Playlists) > 0 {
-    firstPlaylist := playlistResponse.Playlists.Playlists[0]
-
-			// Fetch full playlist entries (GetPlaylists often returns only metadata)
-	
-     for _, entry := range firstPlaylist.Entries {
-        player.Queue = append(player.Queue, QueueItem{
-            entry.Id,
-            connection.GetPlayUrl(&entry),
-            entry.getSongTitle(),
-            entry.Artist,
-            entry.Duration,
-        })
-    }
-
-}
 
 	if *enableMpris {
 		mpris, err := RegisterPlayer(player, logger)
