@@ -73,7 +73,7 @@ func (p *Player) PlayNextTrack() error {
     }
 	
     next := p.Queue[p.CurrentIndex]
-	p.Queue = []QueueItem{{next.Id, next.Uri, next.Title, next.Artist, next.Duration}}
+	//p.Queue = []QueueItem{{next.Id, next.Uri, next.Title, next.Artist, next.Duration}}
     p.ReplaceInProgress = true
     return p.Instance.Command([]string{"loadfile", next.Uri})
 }
