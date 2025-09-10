@@ -196,12 +196,20 @@ func (p *Player) Pause() (int, error) {
 		}
 		return PlayerPaused, nil
 	} else {
-		if len(p.Queue) != 0 {
-			err := p.Instance.Command([]string{"loadfile", p.Queue[0].Uri})
-			return PlayerPlaying, err
-		} else {
-			return PlayerStopped, nil
-		}
+		
+	pl := p.CurrentPlaylist()
+if pl != nil && len(pl.Tracks) > 0 {
+	// Load the first track if no track is currently selected
+	if p.CurrentIndex < 0 || p.CurrentIndex >= len(pl.Tracks) {
+		p.CurrentIndex = 0
+	}
+
+	err := p.Instance.Command([]string{"loadfile", pl.Tracks[p.CurrentIndex].Uri})
+	return PlayerPlaying, err
+} else {
+	return PlayerStopped, nil
+}
+		
 	}
 }
 
