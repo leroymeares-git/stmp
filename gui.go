@@ -934,7 +934,8 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
         }
 
         // ✅ Preselect the Playlist tab instead of Queue
-        ui.pages.SwitchToPage(pagePlaylists)
+        ui.pages.SwitchToPage("playlists")
+		ui.currentPage.SetText("Playlists")
     }
 
 	return ui
