@@ -914,8 +914,8 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 	}
 
 	
-	ui.handleAddPlaylistToQueue()
-	ui.pages.SwitchToPage("playlists")
+	//ui.handleAddPlaylistToQueue()
+	//ui.pages.SwitchToPage("playlists")
 	return ui
 }
 
