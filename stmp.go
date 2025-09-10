@@ -165,6 +165,8 @@ if len(playlistResponse.Playlists.Playlists) > 0 {
 
     player.Queue = queue
 
+}
+
 	if *enableMpris {
 		mpris, err := RegisterPlayer(player, logger)
 		if err != nil {
