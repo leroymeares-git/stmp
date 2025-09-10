@@ -518,7 +518,11 @@ func createUi(_ *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection *Sub
 				if len(ui.player.Queue) > 0 && isPlaying {
 					// it's still playing, submit it
 					currentSong := ui.player.Queue[0]
+					if track := ui.player.CurrentTrack(); track != nil {
+            		ui.connection.ScrobbleSubmission(track.Id, true)
+        			} else {
 					ui.connection.ScrobbleSubmission(currentSong.Id, true)
+						}
 				}
 			}
 		}
@@ -961,7 +965,12 @@ func (ui *Ui) handleMpvEvents() {
 
 			if len(ui.player.Queue) > 0 {
 				currentSong := ui.player.Queue[0]
-				ui.startStopStatus.SetText("[::b]stmp: [green]playing " + currentSong.Title)
+				if track := ui.player.CurrentTrack(); track != nil {
+            		ui.startStopStatus.SetText("[::b]stmp: [green]playing " + track.Title)
+        		} else {
+            		ui.startStopStatus.SetText("[::b]stmp: [green]playing " + currentSong.Title)
+       			 }
+				
 
 				if ui.connection.Scrobble {
 					// scrobble "now playing" event
