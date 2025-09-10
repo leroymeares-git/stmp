@@ -919,16 +919,16 @@ func (ui *Ui) handleMpvEvents() {
 	}
 }
 
-func stringOr(firstChoice string, secondChoice string) string {
-	if firstChoice != "" {
-		return firstChoice
-	}
-	return secondChoice
-}
+//func stringOr(firstChoice string, secondChoice string) string {
+//	if firstChoice != "" {
+	//	return firstChoice
+	//}
+//	return secondChoice
+//}
 
-func iSecondsToMinAndSec(seconds int) (int, int) {
-	return seconds / 60, seconds % 60
-}
+//func iSecondsToMinAndSec(seconds int) (int, int) {
+	//return seconds / 60, seconds % 60
+//}
 
 
 func makeModal(p tview.Primitive, width, height int) tview.Primitive {
