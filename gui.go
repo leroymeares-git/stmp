@@ -864,10 +864,17 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 			}
 			return nil
 		case keybind("playnexttrack"):
-			if err := ui.player.PlayNextTrack(); err != nil {
-				ui.connection.Logger.Printf("InitGui: PlayNextTrack -- %s", err.Error())
-			}
-			return nil
+    if err := ui.player.PlayNextTrack(); err != nil {
+        ui.connection.Logger.Printf("InitGui: PlayNextTrack -- %s", err.Error())
+    } else {
+        // get the current track after advancing
+        if track := ui.player.CurrentTrack(); track != nil {
+            ui.startStopStatus.SetText("[::b]stmp: [green]playing " + track.Title)
+        } else {
+            ui.startStopStatus.SetText("[::b]stmp: [red]no track")
+        }
+    }
+    return nil
 		case keybind("volumeUp"):
 			if err := ui.player.AdjustVolume(5); err != nil {
 				ui.connection.Logger.Printf("InitGui: AdjustVolume %d -- %s", 5, err.Error())
@@ -1072,6 +1079,13 @@ func (e SubsonicEntity) getSongTitle() string {
 	}
 
 	return e.Path[lastSlash+1 : len(e.Path)]
+}
+
+func (p *Player) CurrentTrack() *QueueItem {
+    if len(p.Queue) == 0 || p.CurrentIndex < 0 || p.CurrentIndex >= len(p.Queue) {
+        return nil
+    }
+    return &p.Queue[p.CurrentIndex]
 }
 
 func keyName(event *tcell.EventKey) string {
