@@ -20,20 +20,12 @@ type QueueItem struct {
 	Duration int
 }
 
-type Playlist struct {
-    ID     string
-    Name   string
-    Tracks []QueueItem
-}
-
-
 type Player struct {
 	Instance          *mpv.Mpv
 	EventChannel      chan *mpv.Event
-	Playlists         []Playlist
-    ActiveListIdx     int // which playlist is active
-    CurrentIndex      int // which track in that playlist
-    ReplaceInProgress bool
+	Queue             []QueueItem
+	CurrentIndex      int
+	ReplaceInProgress bool
 }
 
 func eventListener(m *mpv.Mpv) chan *mpv.Event {
@@ -54,7 +46,6 @@ func InitPlayer() (*Player, error) {
 	mpvInstance.SetOptionString("audio-display", "no")
 	mpvInstance.SetOptionString("video", "no")
 
-
 	err := mpvInstance.Initialize()
 	if err != nil {
 		mpvInstance.TerminateDestroy()
@@ -64,99 +55,42 @@ func InitPlayer() (*Player, error) {
 	return &Player{
         Instance:          mpvInstance,
         EventChannel:      eventListener(mpvInstance),
-        Playlists:         []Playlist{},
-        ActiveListIdx:     -1,
-        CurrentIndex:      -1,
+        Queue:             make([]QueueItem, 0),
+        CurrentIndex:      0,
         ReplaceInProgress: false,
     }, nil
 }
 
-func (p *Player) CurrentPlaylist() *Playlist {
-    if p.ActiveListIdx >= 0 && p.ActiveListIdx < len(p.Playlists) {
-        return &p.Playlists[p.ActiveListIdx]
-    }
-    return nil
-}
-
-func (p *Player) CurrentTrack() *QueueItem {
-    pl := p.CurrentPlaylist()
-    if pl == nil {
-        return nil
-    }
-    if p.CurrentIndex >= 0 && p.CurrentIndex < len(pl.Tracks) {
-        return &pl.Tracks[p.CurrentIndex]
-    }
-    return nil
-}
-
-func (p *Player) PlayPlaylist(idx int) error {
-    if idx < 0 || idx >= len(p.Playlists) {
-        return nil
-    }
-
-    p.ActiveListIdx = idx
-    p.CurrentIndex = 0
-    track := p.Playlists[idx].Tracks[p.CurrentIndex]
-    p.ReplaceInProgress = true
-
-    return p.Instance.Command([]string{"loadfile", track.Uri})
-}
-
 func (p *Player) PlayNextTrack() error {
-	pl := p.CurrentPlaylist()
-    if pl == nil || len(pl.Tracks) == 0 {
-        return nil
+	  if len(p.Queue) == 0 {
+        return nil // nothing in queue
     }
 
-    if p.CurrentIndex+1 >= len(pl.Tracks) {
-        // loop back to start of active playlist
-        p.CurrentIndex = 0
-    } else {
-        p.CurrentIndex++
+    if p.CurrentIndex+1 >= len(p.Queue) {
+        return p.Stop() // reached end of queue
     }
 
-    track := pl.Tracks[p.CurrentIndex]
+    p.CurrentIndex++
+    next := p.Queue[p.CurrentIndex]
     p.ReplaceInProgress = true
-    return p.Instance.Command([]string{"loadfile", track.Uri})
+    return p.Instance.Command([]string{"loadfile", next.Uri})
 }
 
-func (p *Player) PlayPreviousTrack() error {
-    pl := p.CurrentPlaylist()
-    if pl == nil || len(pl.Tracks) == 0 {
-        return nil
-    }
-
-    if p.CurrentIndex-1 < 0 {
-        // loop back to end of playlist
-        p.CurrentIndex = len(pl.Tracks) - 1
-    } else {
-        p.CurrentIndex--
-    }
-
-    track := pl.Tracks[p.CurrentIndex]
-    p.ReplaceInProgress = true
-    return p.Instance.Command([]string{"loadfile", track.Uri})
+func (p *Player) PlayNextPlaylist() error {
+	if len(p.Queue) > 0 {
+		return p.Instance.Command([]string{"playlist-next-playlist"})
+	}
+	return nil
 }
 
-func (p *Player) Play(trackIndex int) error {
-    pl := p.CurrentPlaylist()
-    if pl == nil || len(pl.Tracks) == 0 {
-        return nil
-    }
-    if trackIndex < 0 || trackIndex >= len(pl.Tracks) {
-        return nil
-    }
-
-    p.CurrentIndex = trackIndex
-    track := pl.Tracks[trackIndex]
-    p.ReplaceInProgress = true
-
-    // if paused, resume
-    if ip, e := p.IsPaused(); ip && e == nil {
-        p.Pause()
-    }
-
-    return p.Instance.Command([]string{"loadfile", track.Uri})
+func (p *Player) Play(id string, uri string, title string, artist string, duration int) error {
+	p.Queue = []QueueItem{{id, uri, title, artist, duration}}
+	p.CurrentIndex = 0
+	p.ReplaceInProgress = true
+	if ip, e := p.IsPaused(); ip && e == nil {
+		p.Pause()
+	}
+	return p.Instance.Command([]string{"loadfile", uri})
 }
 
 func (p *Player) Stop() error {
@@ -196,20 +130,12 @@ func (p *Player) Pause() (int, error) {
 		}
 		return PlayerPaused, nil
 	} else {
-		
-	pl := p.CurrentPlaylist()
-if pl != nil && len(pl.Tracks) > 0 {
-	// Load the first track if no track is currently selected
-	if p.CurrentIndex < 0 || p.CurrentIndex >= len(pl.Tracks) {
-		p.CurrentIndex = 0
-	}
-
-	err := p.Instance.Command([]string{"loadfile", pl.Tracks[p.CurrentIndex].Uri})
-	return PlayerPlaying, err
-} else {
-	return PlayerStopped, nil
-}
-		
+		if len(p.Queue) != 0 {
+			err := p.Instance.Command([]string{"loadfile", p.Queue[0].Uri})
+			return PlayerPlaying, err
+		} else {
+			return PlayerStopped, nil
+		}
 	}
 }
 
