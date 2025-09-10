@@ -144,26 +144,15 @@ func main() {
 if len(playlistResponse.Playlists.Playlists) > 0 {
     firstPlaylist := playlistResponse.Playlists.Playlists[0]
 
-    // Fetch songs from this playlist
-    songsResponse, err := connection.GetPlaylist(firstPlaylist.ID)
-    if err != nil {
-        fmt.Printf("Error fetching playlist songs: %s\n", err)
-        os.Exit(1)
-    }
-
-    // Build the queue from playlist entries
-    var queue []QueueItem
-    for _, entry := range songsResponse.Playlist.Entry {
-        queue = append(queue, QueueItem{
-            ID:       entry.ID,
-            Uri:      connection.StreamURL(entry.ID),
-            Title:    entry.Title,
-            Artist:   entry.Artist,
-            Duration: entry.Duration,
+     for _, entry := range firstPlaylist.Entries {
+        player.Queue = append(player.Queue, QueueItem{
+            entry.Id,
+            connection.GetPlayUrl(&entry),
+            entry.getSongTitle(),
+            entry.Artist,
+            entry.Duration,
         })
     }
-
-    player.Queue = queue
 
 }
 
