@@ -783,11 +783,7 @@ func (ui *Ui) createPlaylistPage(titleFlex *tview.Flex) (*tview.Flex, tview.Prim
 
 	deletePlaylistModal := makeModal(deletePlaylistFlex, 20, 3)
 
-	    // 👉 automatically load the first playlist
-    if len(ui.playlists) > 0 {
-        ui.playlistList.SetCurrentItem(0)
-        ui.handlePlaylistSelected(ui.playlists[0])
-    }
+
 
 	return playlistFlex, deletePlaylistModal
 }
@@ -919,9 +915,24 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 		panic(err)
 	}
 
+
+		// 🔽 Auto-load the first playlist into the queue
+if len(ui.playlists) > 0 {
+    // highlight the first playlist in the list
+    ui.playlistList.SetCurrentItem(0)
+    // show its songs in the playlist view
+    ui.handlePlaylistSelected(ui.playlists[0])
+    // enqueue all its songs
+    ui.handleAddPlaylistToQueue()
+    // update queue list so it's visible
+    updateQueueList(ui.player, ui.queueList, ui.starIdList)
+
+    // optionally: start directly on the queue page
+    ui.pages.SwitchToPage("queue")
+    ui.currentPage.SetText("Queue")
+}
+
 	
-	//ui.handleAddPlaylistToQueue()
-	//ui.pages.SwitchToPage("playlists")
 	return ui
 }
 
