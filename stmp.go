@@ -152,6 +152,6 @@ func main() {
 	}
 
 	InitGui(&indexResponse.Indexes.Index, &playlistResponse.Playlists.Playlists, connection, player)
-	gui.handleAddPlaylistSongToQueue()
+	
 	
 }
