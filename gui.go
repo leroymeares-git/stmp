@@ -783,6 +783,12 @@ func (ui *Ui) createPlaylistPage(titleFlex *tview.Flex) (*tview.Flex, tview.Prim
 
 	deletePlaylistModal := makeModal(deletePlaylistFlex, 20, 3)
 
+	    // 👉 automatically load the first playlist
+    if len(ui.playlists) > 0 {
+        ui.playlistList.SetCurrentItem(0)
+        ui.handlePlaylistSelected(ui.playlists[0])
+    }
+
 	return playlistFlex, deletePlaylistModal
 }
 
