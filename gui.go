@@ -895,6 +895,9 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 				ui.connection.Logger.Printf("InitGui: AdjustVolume %d -- %s", -5, err.Error())
 			}
 			return nil
+		case viper.GetString("keys.nextPlaylist"):
+    		ui.skipToNextPlaylist()
+    	return nil
 		case keybind("playnexttrack"):
     if err := ui.player.PlayNextTrack(); err != nil {
         ui.connection.Logger.Printf("InitGui: PlayNextTrack -- %s", err.Error())
@@ -960,6 +963,34 @@ func updateQueueList(player *Player, queueList *tview.List, starredItems map[str
 	for _, queueItem := range player.Queue {
 		queueList.AddItem(queueListTextFormat(queueItem, starredItems), "", 0, nil)
 	}
+}
+
+func (ui *Ui) skipToNextPlaylist() {
+    if len(ui.playlists) == 0 {
+        return
+    }
+
+    // get current index
+    currentIndex := ui.playlistList.GetCurrentItem()
+    nextIndex := (currentIndex + 1) % len(ui.playlists) // wrap around
+
+    // move the highlight to the next playlist
+    ui.playlistList.SetCurrentItem(nextIndex)
+    ui.handlePlaylistSelected(ui.playlists[nextIndex])
+
+    // clear the queue first
+    ui.player.Queue = []QueueItem{}
+
+    // add new playlist songs to queue
+    ui.handleAddPlaylistToQueue()
+
+    // update UI
+    updateQueueList(ui.player, ui.queueList, ui.starIdList)
+    ui.pages.SwitchToPage("queue")
+    ui.currentPage.SetText("Queue")
+
+    // log it
+    ui.connection.Logger.Printf("Skipped to playlist: %s", ui.playlists[nextIndex].Name)
 }
 
 func (ui *Ui) handleMpvEvents() {
