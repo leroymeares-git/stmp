@@ -816,6 +816,27 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 		AddPage("deletePlaylist", deletePlaylistModal, true, false).
 		AddPage("log", logListFlex, true, false)
 
+	if len(ui.playlists) > 0 && ui.player != nil {
+    // make sure the playlist list highlights the first playlist
+    ui.playlistList.SetCurrentItem(0)
+
+    // populate the selectedPlaylist view for the first playlist
+    ui.handlePlaylistSelected(ui.playlists[0])
+
+    // debug log: show how many entries we have
+    ui.connection.Logger.Printf("Auto-load playlist '%s' entries=%d", ui.playlists[0].Name, len(ui.playlists[0].Entries))
+
+    // enqueue the playlist items
+    ui.handleAddPlaylistToQueue()
+
+    // refresh the queue list UI so it shows up immediately
+    updateQueueList(ui.player, ui.queueList, ui.starIdList)
+
+    // switch the visible page to queue
+    ui.pages.SwitchToPage("queue")
+    ui.currentPage.SetText("Queue")
+}
+
 	ui.pages.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// we don't want any of these firing if we're trying to add a new playlist
 		focused := ui.app.GetFocus()
@@ -915,24 +936,6 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 		panic(err)
 	}
 
-
-		// 🔽 Auto-load the first playlist into the queue
-if len(ui.playlists) > 0 {
-    // highlight the first playlist in the list
-    ui.playlistList.SetCurrentItem(0)
-    // show its songs in the playlist view
-    ui.handlePlaylistSelected(ui.playlists[0])
-    // enqueue all its songs
-    ui.handleAddPlaylistToQueue()
-    // update queue list so it's visible
-    updateQueueList(ui.player, ui.queueList, ui.starIdList)
-
-    // optionally: start directly on the queue page
-    ui.pages.SwitchToPage("queue")
-    ui.currentPage.SetText("Queue")
-}
-
-	
 	return ui
 }
 
