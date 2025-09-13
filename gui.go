@@ -502,7 +502,7 @@ func createUi(_ *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection *Sub
 		connection:        connection,
 		player:            player,
 		scrobbleTimer:     scrobbleTimer,
-		currentPlaylistIndex: scrobbleTimer,
+		currentPlaylistIndex: currentPlaylistIndex,
 	}
 	ui.currentPlaylistIndex = 0
 	ui.addStarredToList()
