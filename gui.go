@@ -976,29 +976,36 @@ func updateQueueList(player *Player, queueList *tview.List, starredItems map[str
 }
 
 func (ui *Ui) skipToNextPlaylist() {
-    if len(ui.playlists) == 0 {
-        return
-    }
+	if len(ui.playlists) == 0 {
+		return
+	}
 
-    // move to next index (wrap around)
-    ui.currentPlaylistIndex = (ui.currentPlaylistIndex + 1) % len(ui.playlists)
+	// move to next index (wrap around)
+	ui.currentPlaylistIndex++
+	if ui.currentPlaylistIndex >= len(ui.playlists) {
+		ui.currentPlaylistIndex = 0
+	}
 
-    // update selection in the list UI
-    ui.playlistList.SetCurrentItem(ui.currentPlaylistIndex)
-    ui.handlePlaylistSelected(ui.playlists[ui.currentPlaylistIndex])
+	playlist := ui.playlists[ui.currentPlaylistIndex]
 
-    // clear the queue
-    ui.player.Queue = []QueueItem{}
+	// update selection in the list UI
+	ui.playlistList.SetCurrentItem(ui.currentPlaylistIndex)
+	ui.handlePlaylistSelected(playlist)
 
-    // enqueue songs from the new playlist
-    ui.handleAddPlaylistToQueue()
+	// clear the queue first
+	ui.player.Queue = []QueueItem{}
 
-    // refresh queue UI and switch to it
-    updateQueueList(ui.player, ui.queueList, ui.starIdList)
-    ui.pages.SwitchToPage("queue")
-    ui.currentPage.SetText("Queue")
+	// enqueue songs from the new playlist directly, avoiding reliance on GetCurrentItem
+	for _, entity := range playlist.Entries {
+		ui.addSongToQueue(&entity)
+	}
 
-    ui.connection.Logger.Printf("Skipped to playlist: %s", ui.playlists[ui.currentPlaylistIndex].Name)
+	// refresh queue UI and switch to it
+	updateQueueList(ui.player, ui.queueList, ui.starIdList)
+	ui.pages.SwitchToPage("queue")
+	ui.currentPage.SetText("Queue")
+
+	ui.connection.Logger.Printf("Skipped to playlist: %s", playlist.Name)
 }
 
 func (ui *Ui) handleMpvEvents() {
