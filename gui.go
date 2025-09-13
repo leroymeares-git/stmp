@@ -932,6 +932,13 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
 				ui.connection.Logger.Printf("InitGui: Seek %d -- %s", 10, err.Error())
 			}
 			return nil
+		case keybind("playprevtrack"):
+    		if err := ui.player.PlayPreviousTrack(); err != nil {
+        		ui.connection.Logger.Printf("PlayPreviousTrack -- %s", err.Error())
+    		} else if track := ui.player.CurrentTrack(); track != nil {
+       	 		ui.startStopStatus.SetText("[::b]stmp: [green]playing " + track.Title)
+    		}
+    		return nil
 		case keybind("seekBack"):
 			if err := ui.player.Seek(-10); err != nil {
 				ui.connection.Logger.Printf("InitGui: Seek %d -- %s", -10, err.Error())
@@ -967,6 +974,21 @@ func queueListTextFormat(queueItem QueueItem, starredItems map[string]struct{} )
 // Just update the text of a specific row
 func updateQueueListItem(queueList *tview.List, id int, text string) {
 	queueList.SetItemText(id, text, "")
+}
+
+func (p *Player) PlayPreviousTrack() error {
+    if len(p.Queue) == 0 {
+        return fmt.Errorf("queue is empty")
+    }
+
+    // move back one track
+    p.CurrentIndex--
+    if p.CurrentIndex < 0 {
+        p.CurrentIndex = 0 // or wrap around: len(p.Queue)-1
+    }
+
+    track := p.Queue[p.CurrentIndex]
+    return p.Play(track.Id, track.URI, track.Title, track.Artist, track.Duration)
 }
 
 func updateQueueList(player *Player, queueList *tview.List, starredItems map[string]struct{}) {
