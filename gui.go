@@ -800,7 +800,7 @@ func (ui *Ui) createPlaylistPage(titleFlex *tview.Flex) (*tview.Flex, tview.Prim
 func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection *SubsonicConnection, player *Player) *Ui {
 	ui := createUi(indexes, playlists, connection, player)
 
-	ui.currentPlaylistIndex = -1
+
 	// create components shared by pages
 
 	//title row flex
@@ -845,6 +845,7 @@ func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection
     // switch the visible page to queue
     ui.pages.SwitchToPage("queue")
     ui.currentPage.SetText("Queue")
+	ui.currentPlaylistIndex = 0
 }
 
 	ui.pages.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
