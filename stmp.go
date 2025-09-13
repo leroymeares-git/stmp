@@ -35,6 +35,7 @@ func readConfig() {
 	viper.SetDefault("keys.pageBrowser", "1")
 	viper.SetDefault("keys.pageQueue", "2")
 	viper.SetDefault("keys.pagePlaylists", "3")
+	viper.SetDefault("keys.playprevtrack", "6")
 	viper.SetDefault("keys.pageLog", "7")
 	viper.SetDefault("keys.playnexttrack", "8")
 	viper.SetDefault("keys.nextPlaylist", "9") 
