@@ -502,8 +502,9 @@ func createUi(_ *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection *Sub
 		connection:        connection,
 		player:            player,
 		scrobbleTimer:     scrobbleTimer,
+		currentPlaylistIndex: 0,
 	}
-	ui.currentPlaylistIndex = 0
+
 	ui.addStarredToList()
 
 	go func() {
