@@ -36,6 +36,7 @@ type Ui struct {
 	connection        *SubsonicConnection
 	player            *Player
 	scrobbleTimer     *time.Timer
+	currentPlaylistIndex int
 }
 
 func (ui *Ui) handleEntitySelected(directoryId string) {
@@ -84,6 +85,13 @@ func (ui *Ui) handlePlaylistSelected(playlist SubsonicPlaylist) {
 
 		ui.selectedPlaylist.AddItem(title, "", 0, handler)
 	}
+
+	for i, pl := range ui.playlists {
+    if pl.Id == playlist.Id {
+        ui.currentPlaylistIndex = i
+        break
+    }
+}
 }
 
 func (ui *Ui) handleDeleteFromQueue() {
@@ -494,8 +502,9 @@ func createUi(_ *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection *Sub
 		connection:        connection,
 		player:            player,
 		scrobbleTimer:     scrobbleTimer,
+		currentPlaylistIndex: scrobbleTimer,
 	}
-
+	ui.currentPlaylistIndex = 0
 	ui.addStarredToList()
 
 	go func() {
@@ -791,6 +800,7 @@ func (ui *Ui) createPlaylistPage(titleFlex *tview.Flex) (*tview.Flex, tview.Prim
 func InitGui(indexes *[]SubsonicIndex, playlists *[]SubsonicPlaylist, connection *SubsonicConnection, player *Player) *Ui {
 	ui := createUi(indexes, playlists, connection, player)
 
+	ui.currentPlaylistIndex = 0
 	// create components shared by pages
 
 	//title row flex
@@ -970,27 +980,25 @@ func (ui *Ui) skipToNextPlaylist() {
         return
     }
 
-    // get current index
-    currentIndex := ui.playlistList.GetCurrentItem()
-    nextIndex := (currentIndex + 1) % len(ui.playlists) // wrap around
+    // move to next index (wrap around)
+    ui.currentPlaylistIndex = (ui.currentPlaylistIndex + 1) % len(ui.playlists)
 
-    // move the highlight to the next playlist
-    ui.playlistList.SetCurrentItem(nextIndex)
-    ui.handlePlaylistSelected(ui.playlists[nextIndex])
+    // update selection in the list UI
+    ui.playlistList.SetCurrentItem(ui.currentPlaylistIndex)
+    ui.handlePlaylistSelected(ui.playlists[ui.currentPlaylistIndex])
 
-    // clear the queue first
+    // clear the queue
     ui.player.Queue = []QueueItem{}
 
-    // add new playlist songs to queue
+    // enqueue songs from the new playlist
     ui.handleAddPlaylistToQueue()
 
-    // update UI
+    // refresh queue UI and switch to it
     updateQueueList(ui.player, ui.queueList, ui.starIdList)
     ui.pages.SwitchToPage("queue")
     ui.currentPage.SetText("Queue")
 
-    // log it
-    ui.connection.Logger.Printf("Skipped to playlist: %s", ui.playlists[nextIndex].Name)
+    ui.connection.Logger.Printf("Skipped to playlist: %s", ui.playlists[ui.currentPlaylistIndex].Name)
 }
 
 func (ui *Ui) handleMpvEvents() {
