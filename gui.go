@@ -988,7 +988,7 @@ func (p *Player) PlayPreviousTrack() error {
     }
 
     track := p.Queue[p.CurrentIndex]
-    return p.Play(track.Id, track.URI, track.Title, track.Artist, track.Duration)
+    return p.Play(track.Id, track.Uri, track.Title, track.Artist, track.Duration)
 }
 
 func updateQueueList(player *Player, queueList *tview.List, starredItems map[string]struct{}) {
