@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/wildeyedskies/go-mpv/mpv"
+	//"github.com/wildeyedskies/go-mpv/mpv"
+	"github.com/mpv-player/mpv"
 	"strconv"
 )
 
