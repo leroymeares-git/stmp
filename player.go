@@ -2,7 +2,7 @@ package main
 
 import (
 	//"github.com/wildeyedskies/go-mpv/mpv"
-	"github.com/wildeyedskies/go-mpv/tree/master/mpv"
+	"github.com/wildeyedskies/go-mpv/mpv"
 	"strconv"
 )
 
