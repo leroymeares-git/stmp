@@ -10,7 +10,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/spf13/viper"
-	"github.com/wildeyedskies/go-mpv/mpv"
+	//"github.com/wildeyedskies/go-mpv/mpv"
+	"github.com/mpv-player/mpv"
 )
 
 // struct contains all the updatable elements of the Ui
